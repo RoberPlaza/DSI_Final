@@ -31,7 +31,7 @@ def generate_dtw_plots():
             plt.plot(path[0], path[1], 'w')
             plt.xlabel( "Datos de CM" )
             plt.ylabel( f"Datos de { ca }" )
-            plt.savefig( f"images/{ ca }_dtw.pdf" )
+            plt.savefig( f"images/DTW_{ ca }.pdf" )
             plt.clf()
 
 

@@ -63,7 +63,7 @@ for i in range( train_ccaa ):
 ### Cosa estúpida que no entiendo porqué hay que hacer
 train_x     = np.reshape( train_x, ( train_x.shape[ 0 ], 1, train_x.shape[ 1 ] ) )
 train_y     = np.reshape( train_y, ( train_y.shape[ 0 ], 1, train_y.shape[ 1 ] ) )
-clm_x       = np.reshape( clm_x, ( 1, 1, clm_x.shape[ 0 ] ) )
+clm_x       = np.reshape( clm_x, ( 1, 1, 60 ) )
 
 model       = Sequential()
 # =============================================================================
@@ -77,8 +77,28 @@ model       = Sequential()
 # model.add( Dropout( 0.5 ) )
 # =============================================================================
 
-model.add( LSTM( 30, input_shape = ( 1, 60 ) ) )
-model.add( Dense( 1 ) )
+model.add( LSTM( 60, return_sequences = True, batch_input_shape = ( train_ccaa, 1, 60 ) ) )
+model.add( Dropout( 0.5 ) )
+
+model.add( LSTM( 60, return_sequences = True ) )
+model.add( Dropout( 0.5 ) )
+
+model.add( LSTM( 60, return_sequences = True ) )
+model.add( Dropout( 0.5 ) )
+
+model.add( LSTM( 60, return_sequences = True ) )
+model.add( Dropout( 0.5 ) )
+
+model.add( LSTM( 60, return_sequences = True ) )
+model.add( Dropout( 0.5 ) )
+
+model.add( LSTM( 60, return_sequences = True ) )
+model.add( Dropout( 0.5 ) )
+
+model.add( Dense( 60 ) )
+
+model.summary()
 
 model.compile( loss='mean_squared_error', optimizer='adam' )
-model.fit( clm_x, train_x, epochs = 100, batch_size = 1 )
+model.fit( train_y, train_x, epochs = 1000, batch_size = 6, verbose = 1 )
+#model.predict_generator( clm_data, steps = 1 )

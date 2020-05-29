@@ -64,38 +64,12 @@ clm_x       = np.reshape( clm_x, ( 1, 1, clm_x.shape[ 0 ] ) )
 model       = Sequential( )
 model.add( LSTM( train_days, return_sequences = True, input_shape = ( len( target_cols ), train_days ) ) )
 
-# =============================================================================
-# model.add( LSTM( train_days * 2, return_sequences = True ) )
-# model.add( Dropout( 0.50 ) )
-# 
-# model.add( LSTM( train_days * 30, return_sequences = True ) )
-# model.add( Dropout( 0.50 ) )
-# 
-# model.add( LSTM( train_days * 7, return_sequences = True ) )
-# model.add( Dropout( 0.50 ) )
-# 
-# model.add( LSTM( train_days * 30, return_sequences = True ) )
-# model.add( Dropout( 0.50 ) )
-# 
-# model.add( LSTM( train_days * 7, return_sequences = True ) )
-# model.add( Dropout( 0.50 ) )
-# 
-# model.add( LSTM( train_days * 2, return_sequences = True ) )
-# model.add( Dropout( 0.50 ) )
-# 
-# model.add( LSTM( train_days * 7, return_sequences = True ) )
-# model.add( Dropout( 0.50 ) )
-# 
-# model.add( LSTM( train_days * 2, return_sequences = True ) )
-# model.add( Dropout( 0.50 ) )
-# =============================================================================
-
-model.add( LSTM( train_days * 30, return_sequences = True ) )
+model.add( LSTM( train_days * 21, return_sequences = True ) )
 model.add( Dense( 30 ) )
 
 ### Entrenamos el modelo
 model.compile( loss='mean_squared_error', optimizer='adam' )
-model.fit( train_x, train_y, epochs = 10000, batch_size = train_ccaa, verbose = 1 )
+model.fit( train_x, train_y, epochs = 20000, batch_size = train_ccaa, verbose = 1 )
 
 ### Guardamos el modelo en formato hdf5
 model.save( "model/covid_predictor.h5" )
@@ -111,6 +85,7 @@ plt.plot( prediction, label = "Predicción" )
 plt.plot( clm_data.iloc[ 30 : 60, : ][ target_cols ].to_numpy(), label = "Datos experimentales" )
 plt.title( "Predicción de Castilla-La Mancha" )
 plt.legend()
+plt.savefig( "images/Prediction_CLM.pdf" )
 plt.show()
 plt.clf()
 
@@ -127,6 +102,6 @@ for ccaa in similar_ca:
     plt.plot( exp_data, label = "Datos experimentales" )
     plt.title( f"Predicción y datos empíricos de { ccaa }" )
     plt.legend()
-    #plt.savefig( f"images/Prediction_{ ccaa }.pdf" )
+    plt.savefig( f"images/Prediction_{ ccaa }.pdf" )
     plt.show()
     plt.clf()

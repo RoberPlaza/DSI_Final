@@ -19,7 +19,7 @@ distance_f  = lambda pair :len( pair[ 1 ].stepsTaken )
 ### Algunas constantes globales
 target_ccaa = "CM"                                                              # Nos centramos en Castilla-La Mancha
 target_cols = [ "CASOS" ]                                                       # Columna a tratar
-train_ccaa  = 5                                                                 # Número de comunidades autónomas las cuales vamos a entrenar
+train_ccaa  = 8                                                                 # Número de comunidades autónomas las cuales vamos a entrenar
 train_days  = 30                                                                # Número de días de entrenamiento para el dataset
 lookback    = 30                                                                # Memoria de la red neuranal
 base_data   = pd.read_csv( "data/covid_data.csv" )                              # Dataframe con todo el contenido de la evolución del COVID-19                   
@@ -69,7 +69,7 @@ model.add( Dense( 30 ) )
 
 ### Entrenamos el modelo
 model.compile( loss='mean_squared_error', optimizer='adam' )
-model.fit( train_x, train_y, epochs = 20000, batch_size = train_ccaa, verbose = 1 )
+model.fit( train_x, train_y, epochs = 10000, batch_size = train_ccaa, verbose = 1 )
 
 ### Guardamos el modelo en formato hdf5
 model.save( "model/covid_predictor.h5" )
@@ -89,7 +89,7 @@ plt.savefig( "images/Prediction_CLM.pdf" )
 plt.show()
 plt.clf()
 
-for ccaa in similar_ca:
+for ccaa in ccaa_data:
     exp_data    = ccaa_data[ ccaa ][ target_cols ].to_numpy()[ 30 : 60, : ]
     exp_data    = np.resize( exp_data, ( 1, 1, 30 ) )
     

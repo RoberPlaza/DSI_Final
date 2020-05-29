@@ -46,7 +46,7 @@ similar_ca  = [ pair[ 0 ] for pair in sorted( distancias.items(), key = distance
 ### Preinicializamos los arrays de train y test
 train_x     = np.ones( ( train_ccaa, train_days, len( target_cols ) ) )         # Datos de entreno X
 train_y     = np.ones( ( train_ccaa, train_days, len( target_cols ) ) )         # Datos de entreno Y
-clm_x       = clm_data.iloc[ : -train_days * 2 ,  : ][ target_cols ].to_numpy()
+clm_x       = clm_data.iloc[ : 30,  : ][ target_cols ].to_numpy()
 
 ### Creamos los conjuntos de train y test
 for i in range( train_ccaa ):
@@ -54,15 +54,19 @@ for i in range( train_ccaa ):
     train_x[ i ]    = data_as_np[ : train_days ]
     train_y[ i ]    = data_as_np[ lookback : train_days + lookback ]
 
-### Cosa estúpida que no entiendo porqué hay que hacer
+### Cambiamos la forma de los datos para que la red LSTM los admita ( número_muestras, número_columnas, número_filas )
 train_x     = np.reshape( train_x, ( train_x.shape[ 0 ], train_x.shape[ 2 ], train_x.shape[ 1 ] ) )
 train_y     = np.reshape( train_y, ( train_y.shape[ 0 ], train_y.shape[ 2 ], train_y.shape[ 1 ] ) )
 clm_x       = np.reshape( clm_x, ( 1, 1, clm_x.shape[ 0 ] ) )
 
+### Creamos el modelo de predicción con keras
 model       = Sequential()
-model.add( LSTM( train_days, return_sequences = True, batch_input_shape = ( train_ccaa, 1, train_days ) ) )
+model.add( LSTM( train_days, return_sequences = True, input_shape = ( len( target_cols ), train_days ) ) )
 
 model.add( LSTM( train_days * 2, return_sequences = True ) )
+model.add( Dropout( 0.20 ) )
+
+model.add( LSTM( train_days * 30, return_sequences = True ) )
 model.add( Dropout( 0.20 ) )
 
 model.add( LSTM( train_days * 7, return_sequences = True ) )
@@ -71,17 +75,33 @@ model.add( Dropout( 0.20 ) )
 model.add( LSTM( train_days * 30, return_sequences = True ) )
 model.add( Dropout( 0.20 ) )
 
-model.add( LSTM( train_days * 30, return_sequences = True ) )
+model.add( LSTM( train_days * 7, return_sequences = True ) )
 model.add( Dropout( 0.20 ) )
 
 model.add( LSTM( train_days * 2, return_sequences = True ) )
 model.add( Dropout( 0.20 ) )
 
 model.add( LSTM( train_days * 7, return_sequences = True ) )
+model.add( Dropout( 0.20 ) )
+
+model.add( LSTM( train_days * 2, return_sequences = True ) )
+model.add( Dropout( 0.20 ) )
+
+model.add( LSTM( train_days * 30, return_sequences = True ) )
 model.add( Dense( 30 ) )
 
-model.summary()
-
+### Entrenamos el modelo
 model.compile( loss='mean_squared_error', optimizer='adam' )
-model.fit( train_y, train_x, epochs = 2500, batch_size = train_ccaa, verbose = 1 )
-model.predict_generator( clm_x, steps = 1 )
+model.fit( train_x, train_y, epochs = 1500, batch_size = train_ccaa, verbose = 1 )
+
+model.save( "model/covid_predictor.h5" )
+
+prediction = model.predict( clm_x, batch_size = len( target_cols ), verbose = 2 )
+
+prediction = np.resize( prediction.astype( int ), ( 30 ) )
+
+fig = plt.figure()
+plt.plot( prediction, label = "Predicción" )
+plt.plot(  clm_data.iloc[ 30 : 60, : ][ target_cols ].to_numpy(), label = "Datos experimentales" )
+plt.legend()
+plt.show()
